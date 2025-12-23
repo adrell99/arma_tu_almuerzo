@@ -2,14 +2,145 @@ import '../models/item_menu.dart';
 
 final List<MenuItem> menuFijo = [
   MenuItem(
-      nombre: "Almuerzo Ejecutivo",
-      descripcion: "Pollo asado, arroz, ensalada y jugo",
+      nombre: "Pollo Frito",
+      descripcion: "arroz, ensalada ,sopa , limonada, Principio, ",
       precio: 15000,
       categoria: "fijo"),
   MenuItem(
-      nombre: "Sopa + Carne",
-      descripcion: "Sopa de verduras y bistec guisado",
-      precio: 18000,
+      nombre: "Chatas",
+      descripcion:
+          "Arroz, Ensalada, Patacon, Aguacate, Principio, Sopa, Limonada",
+      precio: 21000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Picos sudados",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 13000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Chanfaina",
+      descripcion: "Arroz, Ensalada, Yuca, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pastas con pollo",
+      descripcion: "Pasta con pollo, Papa amarilla, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pastas con bolañesas(carne molidad)",
+      descripcion: "Pasta, Carne molidad, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Alitas BBQ",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 13000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Alitas Fritas",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 13000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Costillas BBQ",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 14000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Costillas Fritas",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 14000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Chuleta de cerdad ahumada",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 14000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Lomo de cerdo plancha",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 13000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Lomo de cerdo BBQ",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 13000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Carne a la plancha",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 14000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Carne a la placha + bistec",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Carne Sudada",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 14000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Mojarra",
+      descripcion:
+          "Arroz, Patacon, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 19000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Sobrebarriga",
+      descripcion:
+          "Arroz, Patacon, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 13000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pechuga hawaiana",
+      descripcion:
+          "Pechuga con Piña+jamon+Queso, Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Arroz con pollo",
+      descripcion: "Arroz con pollo, Papa amarilla, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pollo Apanado",
+      descripcion: "Arroz, Principio, Contorno, Sopa , Ensalada, Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pata sudada",
+      descripcion: "Arroz, Yuca, Principio, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pollo Sudado",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 14000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Higado a la plancha+bistec",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pechuga rellena",
+      descripcion:
+          "pechuga rellena de jamon,queso y verduras + salsa encima,Arroz, Ensalada, Principio, Maduro, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Pechuga milanesa",
+      descripcion:
+          "Pechuga apanada con (panco+huevo), Arroz, Ensalada, Principio, Maduro, Sopa , Limonada",
+      precio: 15000,
+      categoria: "fijo"),
+  MenuItem(
+      nombre: "Lengua en salsa",
+      descripcion: "Arroz, Ensalada, Principio, Contorno, Sopa , Limonada",
+      precio: 13000,
       categoria: "fijo"),
 ];
 
