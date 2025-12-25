@@ -1,9 +1,10 @@
 // lib/screens/arma_almuerzo_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../data/menu_data.dart';
-import '../models/carrito.dart';
 import '../models/item_menu.dart';
+import '../providers/carrito_provider.dart';
 import 'carrito.dart';
 
 class ArmaAlmuerzoScreen extends StatefulWidget {
@@ -14,12 +15,10 @@ class ArmaAlmuerzoScreen extends StatefulWidget {
 }
 
 class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
-  // Mapa: item -> cantidad seleccionada
   final Map<MenuItem, int> _cantidades = {};
 
   final List<String> _categorias = opcionesPersonalizadas.keys.toList();
 
-  // Lista de items con cantidad > 0
   List<MapEntry<MenuItem, int>> get _selectedEntries {
     return _cantidades.entries.where((e) => e.value > 0).toList();
   }
@@ -54,28 +53,48 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
       return;
     }
 
-    final carrito = Provider.of<CarritoProvider>(context, listen: false);
+    final provider = Provider.of<CarritoProvider>(context, listen: false);
 
-    // Crear descripción detallada con cantidades
-    final String detalles =
-        _selectedEntries.map((e) => "${e.value}x ${e.key.nombre}").join(', ');
+    String proteina = "Ninguna";
+    List<String> carbohidratos = [];
+    String ensalada = "Ninguna";
+    String? bebida;
+    List<String> extras = [];
 
-    final String desc = "Incluye: $detalles";
-    final double total = _totalActual;
+    for (var entry in _selectedEntries) {
+      final item = entry.key;
+      final cant = entry.value;
+      final nombreConCant = "${cant > 1 ? '$cant x ' : ''}${item.nombre}";
 
-    final MenuItem customItem = MenuItem(
-      nombre: "Almuerzo Personalizado",
-      descripcion: desc,
-      precio: total,
-      categoria: "personalizado",
+      if (item.categoria == "proteinas") {
+        proteina = nombreConCant;
+      } else if (item.categoria == "carbohidratos") {
+        carbohidratos.add(nombreConCant);
+      } else if (item.categoria == "ensaladas") {
+        ensalada = nombreConCant;
+      } else if (item.categoria == "bebidas") {
+        bebida = nombreConCant;
+      } else if (item.categoria == "extras") {
+        extras.add(nombreConCant);
+      }
+    }
+
+    final almuerzo = AlmuerzoPersonalizado(
+      proteina: proteina,
+      carbohidratos: carbohidratos,
+      ensalada: ensalada,
+      bebida: bebida,
+      extras: extras,
+      precioTotal: _totalActual,
     );
 
-    // Agregar solo una vez el paquete completo (con todo multiplicado ya en el precio)
-    carrito.agregar(customItem);
+    provider.agregarAlmuerzoPersonalizado(almuerzo);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('¡Almuerzo personalizado agregado al carrito!')),
+        content: Text('¡Almuerzo personalizado agregado al carrito! 🍱'),
+        backgroundColor: Colors.green,
+      ),
     );
 
     setState(() {
@@ -143,48 +162,57 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
               },
             ),
           ),
-          // Sección de seleccionados (compacta)
+          // Sección de seleccionados (como antes, height 150 con scroll sin barra visible)
           if (_selectedEntries.isNotEmpty)
             Container(
               height: 150,
               color: Colors.grey[200],
               padding: const EdgeInsets.all(4),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Items seleccionados:',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 2),
-                    ..._selectedEntries.map((entry) {
-                      final item = entry.key;
-                      final cant = entry.value;
-                      final subtotal = item.precio * cant;
-                      return ListTile(
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 0),
-                        title: Text("${cant}x ${item.nombre}",
-                            style: const TextStyle(fontSize: 12)),
-                        subtitle: Text('Subtotal: \$$subtotal',
-                            style: const TextStyle(fontSize: 10)),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete,
-                              color: Colors.red, size: 18),
-                          onPressed: () =>
-                              _decrementar(item), // Quita todas las unidades
-                        ),
-                      );
-                    }),
-                    const Divider(thickness: 0.5),
-                    Text(
-                      'Total: \$${_totalActual.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(
+                    scrollbars: false), // ← CAMBIO: Oculta la barra de scroll
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Items seleccionados:',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      ..._selectedEntries.map((entry) {
+                        final item = entry.key;
+                        final cant = entry.value;
+                        final subtotal = item.precio * cant;
+                        return ListTile(
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 0),
+                          title: Text("${cant}x ${item.nombre}",
+                              style: const TextStyle(fontSize: 12)),
+                          subtitle: Text('Subtotal: \$$subtotal',
+                              style: const TextStyle(fontSize: 10)),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete,
+                                color: Colors.red, size: 18),
+                            onPressed: () {
+                              setState(() {
+                                _cantidades
+                                    .remove(item); // Quita todas las unidades
+                              });
+                            },
+                          ),
+                        );
+                      }),
+                      const Divider(thickness: 0.5),
+                      Text(
+                        'Total: \$${_totalActual.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
