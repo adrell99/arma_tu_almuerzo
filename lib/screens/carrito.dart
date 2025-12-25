@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/carrito.dart';
-import '../models/item_menu.dart';
+
+import '../models/item_menu.dart'; // ← Asegúrate de que este import esté aquí para definir MenuItem
+import '../providers/carrito_provider.dart';
 
 class CarritoScreen extends StatefulWidget {
   const CarritoScreen({super.key});
@@ -28,17 +29,19 @@ class _CarritoScreenState extends State<CarritoScreen> {
     super.dispose();
   }
 
-  // Función para eliminar una unidad de un ítem (o todas si solo hay una)
-  void _eliminarItem(MenuItem item) {
-    final carritoProvider =
-        Provider.of<CarritoProvider>(context, listen: false);
-    carritoProvider.remover(item); // Usa tu método remover (quita una unidad)
-
+  void _eliminarAlmuerzo(int index) {
+    final provider = Provider.of<CarritoProvider>(context, listen: false);
+    provider.removerAlmuerzoPersonalizado(index);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Ítem eliminado del carrito'),
-        duration: Duration(seconds: 1),
-      ),
+      const SnackBar(content: Text('Almuerzo eliminado del carrito')),
+    );
+  }
+
+  void _eliminarItemNormal(MenuItem item) {
+    final provider = Provider.of<CarritoProvider>(context, listen: false);
+    provider.removerItemNormal(item);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Ítem eliminado del carrito')),
     );
   }
 
@@ -51,32 +54,39 @@ class _CarritoScreenState extends State<CarritoScreen> {
       return;
     }
 
-    final carritoProvider =
-        Provider.of<CarritoProvider>(context, listen: false);
-    final List<ItemCarrito> carritoItems = carritoProvider.items;
+    final provider = Provider.of<CarritoProvider>(context, listen: false);
 
-    if (carritoItems.isEmpty) {
+    if (provider.cantidadTotalItems == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('El carrito está vacío')),
       );
       return;
     }
 
-    Map<MenuItem, int> agrupados = {};
-    double total = 0.0;
+    String detallePedido = "";
 
-    for (var itemCarrito in carritoItems) {
-      final item = itemCarrito.item; // Cambia si tu campo se llama diferente
-      agrupados[item] = (agrupados[item] ?? 0) + itemCarrito.cantidad;
-      total += item.precio * itemCarrito.cantidad;
+    for (int i = 0; i < provider.almuerzosPersonalizados.length; i++) {
+      final almuerzo = provider.almuerzosPersonalizados[i];
+      detallePedido += "*Almuerzo Personalizado* 🍱\n";
+      detallePedido += almuerzo.detalleFormateado;
+      detallePedido +=
+          "Precio: \$${almuerzo.precioTotal.toStringAsFixed(0)}\n\n";
     }
 
-    String detallePedido =
-        agrupados.entries.map((e) => "${e.value}x ${e.key.nombre}").join('\n');
+    if (provider.itemsNormales.isNotEmpty) {
+      detallePedido += "*Menús Fijos / Extras:*\n";
+      for (var item in provider.itemsNormales) {
+        detallePedido +=
+            "• ${item.nombre}: ${item.descripcion} - \$${item.precio.toStringAsFixed(0)}\n";
+      }
+    }
 
     String nota = _notaController.text.trim().isEmpty
         ? "Sin nota adicional"
         : _notaController.text.trim();
+
+    final String codigoVerificacion =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(6, 12);
 
     String mensaje = """
 *NUEVO PEDIDO* 🍱
@@ -90,184 +100,224 @@ $detallePedido
 
 *Nota:* $nota
 
-*Total a pagar:* \$${total.toStringAsFixed(0)}
+*Total a pagar:* \$${provider.total.toStringAsFixed(0)}
+
+*Código de verificación:* #$codigoVerificacion (No edites este mensaje para que sea válido)
 
 ¡Gracias por tu pedido! Te confirmaremos pronto 🚀
 """;
 
-    // === TU NÚMERO DE WHATSAPP REAL (con código de país, sin + ni espacios) ===
-    final String tuNumeroWhatsApp = "573176496806"; // ← CAMBIA AQUÍ
+    final String tuNumeroWhatsApp = "573176496806";
 
-    final Uri whatsappUrl = Uri.parse(
-      "https://wa.me/$tuNumeroWhatsApp?text=${Uri.encodeComponent(mensaje)}",
+    final Uri whatsappAppUri = Uri(
+      scheme: 'whatsapp',
+      host: 'send',
+      queryParameters: {
+        'phone': tuNumeroWhatsApp,
+        'text': mensaje,
+      },
     );
 
-    if (await canLaunchUrl(whatsappUrl)) {
-      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-
+    if (await canLaunchUrl(whatsappAppUri)) {
+      await launchUrl(whatsappAppUri, mode: LaunchMode.externalApplication);
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('¡Pedido enviado por WhatsApp!'),
+          content: Text('¡Abriendo WhatsApp con tu pedido listo!'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir WhatsApp')),
+      final Uri whatsappWebUri = Uri.parse(
+        "https://wa.me/$tuNumeroWhatsApp?text=${Uri.encodeComponent(mensaje)}",
       );
+
+      if (await canLaunchUrl(whatsappWebUri)) {
+        await launchUrl(whatsappWebUri, mode: LaunchMode.externalApplication);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Abriendo WhatsApp en navegador...'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'No se pudo abrir WhatsApp. Instala la app o verifica conexión.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final carritoProvider = Provider.of<CarritoProvider>(context);
-    final List<ItemCarrito> carritoItems = carritoProvider.items;
+    return Consumer<CarritoProvider>(
+      builder: (context, provider, child) {
+        final almuerzos = provider.almuerzosPersonalizados;
+        final itemsNormales = provider.itemsNormales;
+        final hayItems = provider.cantidadTotalItems > 0;
 
-    double total = 0.0;
-    for (var itemCarrito in carritoItems) {
-      total += itemCarrito.item.precio * itemCarrito.cantidad;
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Carrito'),
-      ),
-      body: carritoItems.isEmpty
-          ? const Center(
-              child: Text(
-                'Tu carrito está vacío',
-                style: TextStyle(fontSize: 20, color: Colors.grey),
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Resumen de tu pedido',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: carritoItems.length,
-                    itemBuilder: (context, index) {
-                      final itemCarrito = carritoItems[index];
-                      final item = itemCarrito.item;
-                      return Card(
-                        child: ListTile(
-                          title:
-                              Text("${itemCarrito.cantidad}x ${item.nombre}"),
-                          subtitle: Text(
-                            item.descripcion,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Mi Carrito'),
+          ),
+          body: hayItems
+              ? SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Resumen de tu pedido',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      ...almuerzos.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        AlmuerzoPersonalizado almuerzo = entry.value;
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: const Text("Almuerzo Personalizado",
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text(almuerzo.detalleFormateado.trim()),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '\$${almuerzo.precioTotal.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red),
+                                  onPressed: () => _eliminarAlmuerzo(index),
+                                ),
+                              ],
+                            ),
                           ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '\$${(item.precio * itemCarrito.cantidad).toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                        );
+                      }),
+                      ...itemsNormales.map((item) {
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: ListTile(
+                            title: Text(item.nombre),
+                            subtitle: Text(item.descripcion),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '\$${item.precio.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red),
+                                  onPressed: () => _eliminarItemNormal(item),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                      const Divider(height: 30),
+                      Text(
+                        'Total: \$${provider.total.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Completa tus datos para el pedido',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _nombreController,
+                              decoration: const InputDecoration(
+                                labelText: 'Nombre completo *',
+                                border: OutlineInputBorder(),
                               ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _eliminarItem(item),
+                              validator: (value) =>
+                                  value!.trim().isEmpty ? 'Obligatorio' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _telefonoController,
+                              decoration: const InputDecoration(
+                                labelText: 'Teléfono WhatsApp *',
+                                border: OutlineInputBorder(),
                               ),
-                            ],
-                          ),
+                              keyboardType: TextInputType.phone,
+                              validator: (value) =>
+                                  value!.trim().isEmpty ? 'Obligatorio' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _direccionController,
+                              decoration: const InputDecoration(
+                                labelText: 'Dirección y barrio *',
+                                border: OutlineInputBorder(),
+                              ),
+                              maxLines: 2,
+                              validator: (value) =>
+                                  value!.trim().isEmpty ? 'Obligatorio' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _notaController,
+                              decoration: const InputDecoration(
+                                labelText: 'Nota adicional (opcional)',
+                                hintText:
+                                    'Ej: Sin cebolla, timbre fuerte, etc.',
+                                border: OutlineInputBorder(),
+                              ),
+                              maxLines: 3,
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
-                  const Divider(height: 30),
-                  Text(
-                    'Total: \$${total.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Completa tus datos para el pedido',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: _nombreController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nombre completo *',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) =>
-                              value!.trim().isEmpty ? 'Obligatorio' : null,
+                      ),
+                      const SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: _enviarPedidoPorWhatsApp,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          minimumSize: const Size(double.infinity, 60),
+                          backgroundColor: Colors.green,
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _telefonoController,
-                          decoration: const InputDecoration(
-                            labelText: 'Teléfono WhatsApp *',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.phone,
-                          validator: (value) =>
-                              value!.trim().isEmpty ? 'Obligatorio' : null,
+                        child: const Text(
+                          'Enviar Pedido por WhatsApp',
+                          style: TextStyle(fontSize: 20, color: Colors.white),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _direccionController,
-                          decoration: const InputDecoration(
-                            labelText: 'Dirección y barrio *',
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 2,
-                          validator: (value) =>
-                              value!.trim().isEmpty ? 'Obligatorio' : null,
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _notaController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nota adicional (opcional)',
-                            hintText:
-                                'Ej: En alitas sacar ensalada, timbre fuerte, etc.',
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 3,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                  const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: _enviarPedidoPorWhatsApp,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      minimumSize: const Size(double.infinity, 60),
-                      backgroundColor: Colors.green,
-                    ),
-                    child: const Text(
-                      'Enviar Pedido por WhatsApp',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
-                    ),
+                )
+              : const Center(
+                  child: Text(
+                    'Tu carrito está vacío',
+                    style: TextStyle(fontSize: 20, color: Colors.grey),
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
+                ),
+        );
+      },
     );
   }
 }
