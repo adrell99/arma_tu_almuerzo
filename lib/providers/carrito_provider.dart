@@ -1,35 +1,93 @@
-// ignore: duplicate_ignore
-// ignore: file_names, duplicate_ignore
-// ignore: file_names
 // lib/providers/carrito_provider.dart
-// ignore_for_file: file_names
-
-import 'package:arma_tu_almuerzo/models/item_menu.dart';
 import 'package:flutter/material.dart';
-// Asegúrate de que la ruta sea correcta
+import '../models/item_menu.dart'; // Ajusta la ruta si es necesario
+
+// Clase para representar un almuerzo personalizado con todo su detalle
+class AlmuerzoPersonalizado {
+  final String proteina;
+  final List<String> carbohidratos;
+  final String ensalada;
+  final String? bebida;
+  final List<String> extras;
+  final double precioTotal;
+
+  AlmuerzoPersonalizado({
+    required this.proteina,
+    required this.carbohidratos,
+    required this.ensalada,
+    this.bebida,
+    this.extras = const [],
+    required this.precioTotal,
+  });
+
+  // Método para formatear bonito el detalle
+  String get detalleFormateado {
+    String detalle = "• Proteína: $proteina\n";
+    detalle += "• Carbohidratos: ${carbohidratos.join(', ')}\n";
+    detalle += "• Ensalada: $ensalada\n";
+    if (bebida != null && bebida!.isNotEmpty) {
+      detalle += "• Bebida: $bebida\n";
+    }
+    if (extras.isNotEmpty) {
+      detalle += "• Extras: ${extras.join(', ')}\n";
+    }
+    return detalle;
+  }
+}
 
 class CarritoProvider extends ChangeNotifier {
-  final List<MenuItem> _items = []; // Lista de items en el carrito
-  List<MenuItem> get items => _items;
+  // Ítems normales (bebidas, sopas, postres, etc.)
+  final List<MenuItem> _itemsNormales = [];
+  List<MenuItem> get itemsNormales => _itemsNormales;
 
+  // Almuerzos personalizados (puede haber más de uno)
+  final List<AlmuerzoPersonalizado> _almuerzosPersonalizados = [];
+  List<AlmuerzoPersonalizado> get almuerzosPersonalizados =>
+      _almuerzosPersonalizados;
+
+  // Cantidad total de almuerzos (personalizados)
+  int get cantidadAlmuerzos => _almuerzosPersonalizados.length;
+
+  // Todos los ítems para mostrar en pantalla (opcional)
+  int get cantidadTotalItems =>
+      _itemsNormales.length + _almuerzosPersonalizados.length;
+
+  // Precio total completo
   double get total {
-    return _items.fold(0, (sum, item) => sum + item.precio);
+    double totalAlmuerzos =
+        _almuerzosPersonalizados.fold(0, (sum, a) => sum + a.precioTotal);
+    double totalNormales =
+        _itemsNormales.fold(0, (sum, item) => sum + item.precio);
+    return totalAlmuerzos + totalNormales;
   }
 
-  int get cantidad => _items.length;
-
-  void agregar(MenuItem item) {
-    _items.add(item);
-    notifyListeners(); // Importante: notifica a los listeners
-  }
-
-  void remover(MenuItem item) {
-    _items.remove(item);
+  // === MÉTODOS PARA ALMUERZOS PERSONALIZADOS ===
+  void agregarAlmuerzoPersonalizado(AlmuerzoPersonalizado almuerzo) {
+    _almuerzosPersonalizados.add(almuerzo);
     notifyListeners();
   }
 
-  void vaciar() {
-    _items.clear();
+  void removerAlmuerzoPersonalizado(int index) {
+    if (index >= 0 && index < _almuerzosPersonalizados.length) {
+      _almuerzosPersonalizados.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  // === MÉTODOS PARA ÍTEMS NORMALES ===
+  void agregarItemNormal(MenuItem item) {
+    _itemsNormales.add(item);
+    notifyListeners();
+  }
+
+  void removerItemNormal(MenuItem item) {
+    _itemsNormales.remove(item);
+    notifyListeners();
+  }
+
+  void vaciarCarrito() {
+    _itemsNormales.clear();
+    _almuerzosPersonalizados.clear();
     notifyListeners();
   }
 }
