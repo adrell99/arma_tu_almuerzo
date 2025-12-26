@@ -14,27 +14,10 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Arma Tu Almuerzo 🍽️',
-          style: TextStyle(
-            color: Colors.white, // Blanco
-            fontSize: 32, // MÁS GRANDE (antes era ~20-24)
-            fontWeight: FontWeight.bold, // Negrita para que resalte
-            shadows: [
-              Shadow(
-                blurRadius: 10,
-                color: Colors.black,
-                offset: Offset(2, 2),
-              ),
-            ],
-          ),
-        ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            color: Colors.orange[700], // Carrito en naranja intenso
-            iconSize: 34, // Un poco más grande para que se vea bien
+            icon: const Icon(Icons.shopping_cart, color: Colors.orange),
+            iconSize: 34,
             onPressed: () {
               Navigator.push(
                 context,
@@ -42,23 +25,24 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Stack(
         children: [
-          // Fondo full screen (tu Bandeja Paisa)
+          // Fondo bandeja paisa
           Container(
             width: double.infinity,
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/images/bandeja_paisa.jpg'), // ← nombre de tu foto
+                image: AssetImage('assets/images/bandeja_paisa.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Overlay oscuro
+
+          // Overlay oscuro - CORREGIDO: usando withValues en lugar de withOpacity
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -74,69 +58,109 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Contenido principal
+
+          // Contenido principal - con adaptación a pantallas grandes/pequeñas
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    '¡Bienvenido!\nElige cómo quieres pedir hoy',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 10,
-                          color: Colors.black,
-                          offset: Offset(2, 2),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                bool isSmallScreen = constraints.maxHeight < 700;
+
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          mainAxisAlignment: isSmallScreen
+                              ? MainAxisAlignment.start
+                              : MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 40),
+                            const Text(
+                              'Arma Tu Almuerzo 🍽️',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 38,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 12,
+                                    color: Colors.black,
+                                    offset: Offset(3, 3),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              '¡Bienvenido!\nElige cómo quieres pedir hoy',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 10,
+                                    color: Colors.black,
+                                    offset: Offset(2, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 60),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 60, vertical: 25),
+                                textStyle: const TextStyle(fontSize: 24),
+                                backgroundColor: Colors.orange[100],
+                                foregroundColor: Colors.black87,
+                                elevation: 10,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const MenuFijoScreen()),
+                                );
+                              },
+                              child: const Text('Menú del Día'),
+                            ),
+                            const SizedBox(height: 40),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 60, vertical: 25),
+                                textStyle: const TextStyle(fontSize: 24),
+                                backgroundColor: Colors.orange[700],
+                                foregroundColor: Colors.white,
+                                elevation: 10,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ArmaAlmuerzoScreen()),
+                                );
+                              },
+                              child: const Text('Arma Tu Almuerzo'),
+                            ),
+                            if (!isSmallScreen) const Spacer(),
+                            if (!isSmallScreen) const SizedBox(height: 50),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 80),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 60, vertical: 25),
-                      textStyle: const TextStyle(fontSize: 24),
-                      backgroundColor: Colors.orange[100],
-                      foregroundColor: Colors.black87,
-                      elevation: 10,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const MenuFijoScreen()),
-                      );
-                    },
-                    child: const Text('Menú del Día'),
-                  ),
-                  const SizedBox(height: 40),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 60, vertical: 25),
-                      textStyle: const TextStyle(fontSize: 24),
-                      backgroundColor: Colors.orange[700],
-                      foregroundColor: Colors.white,
-                      elevation: 10,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const ArmaAlmuerzoScreen()),
-                      );
-                    },
-                    child: const Text('Arma Tu Almuerzo'),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],
