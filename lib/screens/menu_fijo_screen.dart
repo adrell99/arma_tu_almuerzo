@@ -23,6 +23,7 @@ class MenuFijoScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Menú del Día'),
         backgroundColor: Colors.orange,
+        centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.shopping_cart),
@@ -38,27 +39,12 @@ class MenuFijoScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ===== BANNER GRANDE =====
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              color: Colors.orangeAccent,
-              child: const Center(
-                child: Text(
-                  "MENÚ DEL DÍA",
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 3,
-                  ),
-                ),
-              ),
-            ),
+            // ===== QUITAMOS EL BANNER GRANDE NARANJA (ya no está duplicado) =====
 
-            const SizedBox(height: 25),
+            const SizedBox(
+                height: 16), // Espacio pequeño para que no pegue al AppBar
 
-            // ===== TARJETA CON LO QUE INCLUYE HOY =====
+            // ===== TARJETA "HOY INCLUYE" SUBIDA MÁS ARRIBA =====
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Card(
@@ -79,14 +65,30 @@ class MenuFijoScreen extends StatelessWidget {
                           color: Colors.orange,
                         ),
                       ),
+                      const SizedBox(height: 25),
+                      _buildInclusionItemImproved(
+                        emoji: "🥣",
+                        titulo: "Sopa",
+                        descripcion: sopaDelDia,
+                      ),
                       const SizedBox(height: 20),
-                      _buildInclusionItem("🥣 Sopa", sopaDelDia),
-                      const SizedBox(height: 15),
-                      _buildInclusionItem("🍲 Principio", principioDelDia),
-                      const SizedBox(height: 15),
-                      _buildInclusionItem("🥗 Ensalada", ensaladaDelDia),
-                      const SizedBox(height: 15),
-                      _buildInclusionItem("🍽️ Contorno", contornoDelDia),
+                      _buildInclusionItemImproved(
+                        emoji: "🍲",
+                        titulo: "Principio",
+                        descripcion: principioDelDia,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildInclusionItemImproved(
+                        emoji: "🥗",
+                        titulo: "Ensalada",
+                        descripcion: ensaladaDelDia,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildInclusionItemImproved(
+                        emoji: "🍽️",
+                        titulo: "Contorno",
+                        descripcion: contornoDelDia,
+                      ),
                     ],
                   ),
                 ),
@@ -95,7 +97,7 @@ class MenuFijoScreen extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            // ===== LISTA DE PLATOS FIJOS (tu código original) =====
+            // ===== ELIGE TU PLATO PRINCIPAL =====
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
@@ -111,9 +113,8 @@ class MenuFijoScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             ListView.builder(
-              shrinkWrap: true, // Importante para que funcione dentro de Column
-              physics:
-                  const NeverScrollableScrollPhysics(), // Evita scroll anidado
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               itemCount: menuFijo.length,
               itemBuilder: (context, index) {
@@ -157,17 +158,41 @@ class MenuFijoScreen extends StatelessWidget {
     );
   }
 
-  // Método auxiliar para los ítems de inclusión
-  Widget _buildInclusionItem(String icon, String texto) {
-    return Row(
+  Widget _buildInclusionItemImproved({
+    required String emoji,
+    required String titulo,
+    required String descripcion,
+  }) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(icon, style: const TextStyle(fontSize: 32)),
-        const SizedBox(width: 15),
-        Expanded(
+        Row(
+          children: [
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 28),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              titulo,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 40),
           child: Text(
-            texto,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            descripcion,
+            style: const TextStyle(
+              fontSize: 18,
+              color: Color.fromARGB(255, 79, 65, 65),
+              height: 1.4,
+            ),
           ),
         ),
       ],
