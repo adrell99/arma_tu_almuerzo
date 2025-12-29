@@ -12,11 +12,99 @@ dependencies:
     sdk: flutter
   provider: ^6.1.2
   collection: ^1.18.0
+  url_launcher: ^6.3.0
+  flutter_native_splash: ^2.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/menu/logo.jpg
+    - assets/images/menu/huevo_frito.jpg
+    - assets/images/menu/albondigas.jpg
+    - assets/images/menu/bandeja_paisa.jpg
+    - assets/images/menu/pollo_frito.jpg
+    - assets/images/menu/chatas.jpg
+    - assets/images/menu/picos_sudados.jpg
+    - assets/images/menu/chanfaina.jpg
+    - assets/images/menu/pastas_pollo.jpg
+    - assets/images/menu/pastas_bolonesa.jpg
+    - assets/images/menu/alitas_bbq.jpg
+    - assets/images/menu/alitas_fritas.jpg
+    - assets/images/menu/costillas_bbq.jpg
+    - assets/images/menu/costillas_fritas.jpg
+    - assets/images/menu/chuleta_ahumada.jpg
+    - assets/images/menu/lomo_cerdo_plancha.jpg
+    - assets/images/menu/lomo_bbq.jpg
+    - assets/images/menu/carne_plancha.jpg
+    - assets/images/menu/carne_bistec.jpg
+    - assets/images/menu/carne_sudada.jpg
+    - assets/images/menu/mojarra_frita.jpg
+    - assets/images/menu/sobrebarriga.jpg
+    - assets/images/menu/pechuga_hawaiana.jpg
+    - assets/images/menu/arroz_con_pollo.jpg
+    - assets/images/menu/pollo_apanado.jpg
+    - assets/images/menu/pata_sudada.jpg
+    - assets/images/menu/pollo_sudado.jpg
+    - assets/images/menu/higado_bistec.jpg
+    - assets/images/menu/pechuga_rellena.jpg
+    - assets/images/menu/pechuga_milanesa.jpg
+    - assets/images/menu/lengua_salsa.jpg
+    - assets/images/menu/pechuga_asada.jpg
+    - assets/images/menu/carne_molida.jpg
+    - assets/images/menu/pollo_guisado.jpg
+    - assets/images/menu/carne_sudada.jpg
+    - assets/images/menu/alitas_bbq.jpg
+    - assets/images/menu/costillas_bbq.jpg
+    - assets/images/menu/costillas_fritas.jpg
+    - assets/images/menu/mojarra_frita.jpg
+    - assets/images/menu/sobrebarriga.jpg
+    - assets/images/menu/pollo_apanado.jpg
+    - assets/images/menu/pata_sudada.jpg
+    - assets/images/menu/carne_plancha.jpg
+    - assets/images/menu/chuleta_ahumada.jpg
+    - assets/images/menu/pollo_frito.jpg
+    - assets/images/menu/higado_plancha.jpg
+    - assets/images/menu/higado_bistec.jpg
+    - assets/images/menu/chanfaina.jpg
+    - assets/images/menu/lomo_cerdo_plancha.jpg
+    - assets/images/menu/lomo_bbq.jpg
+    - assets/images/menu/picos_sudados.jpg
+    - assets/images/menu/lentejas.jpg
+    - assets/images/menu/lentejas_grande.jpg
+    - assets/images/menu/verduras_mixtas.jpg
+    - assets/images/menu/arroz_mucho.jpg
+    - assets/images/menu/arroz_blanco.jpg
+    - assets/images/menu/arroz_poco.jpg
+    - assets/images/menu/pastas_bolonesa_mini.jpg
+    - assets/images/menu/pastas_bolonesa.jpg
+    - assets/images/menu/papa_francesa.jpg
+    - assets/images/menu/papa_francesa_grande.jpg
+    - assets/images/menu/maduro_tajadas.jpg
+    - assets/images/menu/patacon.jpg
+    - assets/images/menu/yuca_vapor.jpg
+    - assets/images/menu/papa_salada.jpg
+    - assets/images/menu/pastas_simples.jpg
+    - assets/images/menu/pastas_pollo.jpg
+    - assets/images/menu/arroz_con_pollo.jpg
+    - assets/images/menu/jugo_natural.jpg
+    - assets/images/menu/gaseosa.jpg
+    - assets/images/menu/agua_botella.jpg
+    - assets/images/menu/limonada.jpg
+    - assets/images/menu/aguacate_tajada.jpg
+    - assets/images/menu/aguacate_grande.jpg
+    - assets/images/menu/medio_aguacate.jpg
+    - assets/images/menu/sopa_dia.jpg
+
+flutter_native_splash:
+  color: "#E31C2D"  # Rojo de tu logo
+  image: assets/images/menu/logo.jpg  # Ruta a tu imagen (usa .png si puedes para mejor calidad)
+  android: true
+  ios: true
+  android_gravity: center  # Centrado
+  ios_content_mode: center
