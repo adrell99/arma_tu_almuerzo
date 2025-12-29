@@ -1,4 +1,5 @@
 // lib/screens/arma_almuerzo_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -386,113 +387,187 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                       final bool puedeDecrementar = cantidad > 0;
 
                       return Card(
-                        elevation: 4,
+                        elevation: 8,
                         margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
+                            horizontal: 16, vertical: 12),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(18),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Nombre y descripción con todo el espacio
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.nombre,
-                                      style: const TextStyle(
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      item.descripcion,
-                                      style: TextStyle(
-                                        fontSize: 15.5,
-                                        color: Colors.grey[700],
-                                        height: 1.6,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Contador PEQUEÑO + Precio debajo
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  // Contador reducido
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange[50],
-                                      borderRadius: BorderRadius.circular(30),
-                                      border: Border.all(
-                                          color: Colors.orange[300]!),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 4),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
+                            borderRadius: BorderRadius.circular(20)),
+                        clipBehavior: Clip.antiAlias,
+                        child: Stack(
+                          children: [
+                            // IMAGEN DINÁMICA CON FALLBACK Y ERROR HANDLING
+                            Image.asset(
+                              item.imagen,
+                              width: double.infinity,
+                              height: 180,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: double.infinity,
+                                  height: 180,
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        IconButton(
-                                          iconSize: 18,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                              minWidth: 28, minHeight: 28),
-                                          icon: Icon(
-                                            Icons.remove,
-                                            color: puedeDecrementar
-                                                ? Colors.orange[700]
-                                                : Colors.grey[400],
-                                          ),
-                                          onPressed: puedeDecrementar
-                                              ? () => _decrementar(item)
-                                              : null,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          child: Text(
-                                            '$cantidad',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          iconSize: 18,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                              minWidth: 28, minHeight: 28),
-                                          icon: const Icon(Icons.add,
-                                              color: Colors.green),
-                                          onPressed: () => _incrementar(item),
+                                        Icon(Icons.image_not_supported,
+                                            size: 50, color: Colors.grey),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          'Imagen no disponible',
+                                          style: TextStyle(
+                                              color: Colors.grey, fontSize: 14),
                                         ),
                                       ],
                                     ),
                                   ),
+                                );
+                              },
+                            ),
 
-                                  const SizedBox(height: 12),
+                            // Degradado oscuro → CORREGIDO: con withValues()
+                            Container(
+                              height: 180,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withValues(alpha: 0.4),
+                                    Colors.black.withValues(alpha: 0.7),
+                                  ],
+                                ),
+                              ),
+                            ),
 
-                                  // Precio debajo
-                                  Text(
-                                    '\$${item.precio.toStringAsFixed(0)}',
-                                    style: const TextStyle(
-                                      fontSize: 21,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange,
+                            // Contenido: textos y botones
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.nombre,
+                                              style: const TextStyle(
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                                shadows: [
+                                                  Shadow(
+                                                      blurRadius: 8,
+                                                      color: Colors.black,
+                                                      offset: Offset(2, 2)),
+                                                ],
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              item.descripcion,
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.white,
+                                                height: 1.4,
+                                                shadows: [
+                                                  Shadow(
+                                                      blurRadius: 4,
+                                                      color: Colors.black,
+                                                      offset: Offset(1, 1)),
+                                                ],
+                                              ),
+                                              maxLines: 3,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                        Text(
+                                          '\$${item.precio.toStringAsFixed(0)}',
+                                          style: const TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            shadows: [
+                                              Shadow(
+                                                  blurRadius: 6,
+                                                  color: Colors.black,
+                                                  offset: Offset(2, 2)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        // Fondo blanco semitransparente → CORREGIDO: con withValues()
+                                        color:
+                                            Colors.white.withValues(alpha: 0.9),
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                            color: Colors.orange, width: 2),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 6),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            iconSize: 20,
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(
+                                                minWidth: 32, minHeight: 32),
+                                            icon: Icon(
+                                              Icons.remove,
+                                              color: puedeDecrementar
+                                                  ? Colors.orange[800]!
+                                                  : Colors.grey,
+                                            ),
+                                            onPressed: puedeDecrementar
+                                                ? () => _decrementar(item)
+                                                : null,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12),
+                                            child: Text(
+                                              '$cantidad',
+                                              style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black87),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            iconSize: 20,
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(
+                                                minWidth: 32, minHeight: 32),
+                                            icon: const Icon(Icons.add,
+                                                color: Colors.green),
+                                            onPressed: () => _incrementar(item),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     }).toList(),
@@ -501,8 +576,6 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
               },
             ),
           ),
-
-          // Resumen inferior
           if (_selectedEntries.isNotEmpty)
             Container(
               height: 260,
@@ -546,12 +619,10 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                                 child: Text("$cant x ${item.nombre}",
                                     style: const TextStyle(fontSize: 17)),
                               ),
-                              Text(
-                                '\$${subtotal.toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.orange),
-                              ),
+                              Text('\$${subtotal.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange)),
                               IconButton(
                                 icon: Icon(Icons.delete,
                                     color: Colors.orange[700], size: 28),
@@ -570,13 +641,11 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                       const Text('Total',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
-                      Text(
-                        '\$${_totalActual.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange),
-                      ),
+                      Text('\$${_totalActual.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange)),
                     ],
                   ),
                 ],
@@ -609,3 +678,4 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
     );
   }
 }
+
