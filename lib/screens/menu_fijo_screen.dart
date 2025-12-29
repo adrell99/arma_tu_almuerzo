@@ -1,4 +1,5 @@
 // lib/screens/menu_fijo_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,12 +10,23 @@ import 'carrito.dart';
 class MenuFijoScreen extends StatelessWidget {
   const MenuFijoScreen({super.key});
 
-  // ==== CAMBIA ESTOS TEXTOS CADA DÍA ====
+  // ==== CAMBIA ESTOS TEXTOS E IMÁGENES CADA DÍA ====
   final String sopaDelDia = "Sopa de verduras con fideos y pollo";
+  final String sopaImagen =
+      "assets/images/sopa.jpg"; // Cambia por la ruta real de la imagen
+
   final String principioDelDia = "Lentejas guisadas";
+  final String principioImagen =
+      "assets/images/principio.jpg"; // Cambia por la ruta real
+
   final String ensaladaDelDia =
       "Ensalada mixta (lechuga, tomate, cebolla y zanahoria)";
+  final String ensaladaImagen =
+      "assets/images/ensalada.jpg"; // Cambia por la ruta real
+
   final String contornoDelDia = "Papa salada / Patacón / Yuca al vapor";
+  final String contornoImagen =
+      "assets/images/contorno.jpg"; // Cambia por la ruta real
   // =======================================
 
   @override
@@ -70,24 +82,28 @@ class MenuFijoScreen extends StatelessWidget {
                         emoji: "🥣",
                         titulo: "Sopa",
                         descripcion: sopaDelDia,
+                        imagen: sopaImagen,
                       ),
                       const SizedBox(height: 20),
                       _buildInclusionItemImproved(
                         emoji: "🍲",
                         titulo: "Principio",
                         descripcion: principioDelDia,
+                        imagen: principioImagen,
                       ),
                       const SizedBox(height: 20),
                       _buildInclusionItemImproved(
                         emoji: "🥗",
                         titulo: "Ensalada",
                         descripcion: ensaladaDelDia,
+                        imagen: ensaladaImagen,
                       ),
                       const SizedBox(height: 20),
                       _buildInclusionItemImproved(
                         emoji: "🍽️",
                         titulo: "Contorno",
                         descripcion: contornoDelDia,
+                        imagen: contornoImagen,
                       ),
                     ],
                   ),
@@ -120,32 +136,147 @@ class MenuFijoScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = menuFijo[index];
                 return Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    title: Text(
-                      item.nombre,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(item.descripcion),
-                    trailing: Text(
-                      '\$${item.precio.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () {
-                      final provider =
-                          Provider.of<CarritoProvider>(context, listen: false);
-                      provider.agregarItemNormal(item);
+                  elevation: 8,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    children: [
+                      // Imagen del ítem
+                      Image.asset(
+                        item.imagen,
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: double.infinity,
+                            height: 180,
+                            color: Colors.grey[300],
+                            child: const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.image_not_supported,
+                                      size: 50, color: Colors.grey),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Imagen no disponible',
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              Text('${item.nombre} agregado al carrito 🍱'),
-                          backgroundColor: Colors.green,
+                      // Degradado oscuro
+                      Container(
+                        height: 180,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.4),
+                              Colors.black.withOpacity(0.7),
+                            ],
+                          ),
                         ),
-                      );
-                    },
+                      ),
+
+                      // Contenido: textos y botón
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              item.nombre,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                      blurRadius: 8,
+                                      color: Colors.black,
+                                      offset: Offset(2, 2)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              item.descripcion,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.white,
+                                height: 1.4,
+                                shadows: [
+                                  Shadow(
+                                      blurRadius: 4,
+                                      color: Colors.black,
+                                      offset: Offset(1, 1)),
+                                ],
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '\$${item.precio.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                          blurRadius: 6,
+                                          color: Colors.black,
+                                          offset: Offset(2, 2)),
+                                    ],
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    final provider =
+                                        Provider.of<CarritoProvider>(context,
+                                            listen: false);
+                                    provider.agregarItemNormal(item);
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            '${item.nombre} agregado al carrito 🍱'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Agregar',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -162,6 +293,7 @@ class MenuFijoScreen extends StatelessWidget {
     required String emoji,
     required String titulo,
     required String descripcion,
+    required String imagen,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,6 +314,26 @@ class MenuFijoScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            imagen,
+            height: 120,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                height: 120,
+                color: Colors.grey[300],
+                child: const Center(
+                  child: Icon(Icons.image_not_supported,
+                      size: 40, color: Colors.grey),
+                ),
+              );
+            },
+          ),
         ),
         const SizedBox(height: 8),
         Padding(
