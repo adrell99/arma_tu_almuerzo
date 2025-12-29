@@ -1,42 +1,10 @@
 // lib/providers/carrito_provider.dart
+
 import 'package:flutter/material.dart';
-import '../models/item_menu.dart'; // Ajusta la ruta si es necesario
-
-// Clase para representar un almuerzo personalizado con todo su detalle
-class AlmuerzoPersonalizado {
-  final String proteina;
-  final List<String> carbohidratos;
-  final String ensalada;
-  final String? bebida;
-  final List<String> extras;
-  final double precioTotal;
-
-  AlmuerzoPersonalizado({
-    required this.proteina,
-    required this.carbohidratos,
-    required this.ensalada,
-    this.bebida,
-    this.extras = const [],
-    required this.precioTotal,
-  });
-
-  // Método para formatear bonito el detalle
-  String get detalleFormateado {
-    String detalle = "• Proteína: $proteina\n";
-    detalle += "• Carbohidratos: ${carbohidratos.join(', ')}\n";
-    detalle += "• Ensalada: $ensalada\n";
-    if (bebida != null && bebida!.isNotEmpty) {
-      detalle += "• Bebida: $bebida\n";
-    }
-    if (extras.isNotEmpty) {
-      detalle += "• Extras: ${extras.join(', ')}\n";
-    }
-    return detalle;
-  }
-}
+import '../models/item_menu.dart'; // ← Aquí está la clase AlmuerzoPersonalizado correcta (con listas y método descripcion)
 
 class CarritoProvider extends ChangeNotifier {
-  // Ítems normales (bebidas, sopas, postres, etc.)
+  // Ítems normales (bebidas, sopas, postres, menús fijos, etc.)
   final List<MenuItem> _itemsNormales = [];
   List<MenuItem> get itemsNormales => _itemsNormales;
 
@@ -45,14 +13,14 @@ class CarritoProvider extends ChangeNotifier {
   List<AlmuerzoPersonalizado> get almuerzosPersonalizados =>
       _almuerzosPersonalizados;
 
-  // Cantidad total de almuerzos (personalizados)
+  // Cantidad total de almuerzos personalizados
   int get cantidadAlmuerzos => _almuerzosPersonalizados.length;
 
-  // Todos los ítems para mostrar en pantalla (opcional)
+  // Cantidad total de ítems en el carrito (almuerzos + normales)
   int get cantidadTotalItems =>
       _itemsNormales.length + _almuerzosPersonalizados.length;
 
-  // Precio total completo
+  // Precio total completo del carrito
   double get total {
     double totalAlmuerzos =
         _almuerzosPersonalizados.fold(0, (sum, a) => sum + a.precioTotal);
@@ -85,6 +53,7 @@ class CarritoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Vacía todo el carrito
   void vaciarCarrito() {
     _itemsNormales.clear();
     _almuerzosPersonalizados.clear();
