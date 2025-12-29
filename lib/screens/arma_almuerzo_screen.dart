@@ -17,49 +17,64 @@ class ArmaAlmuerzoScreen extends StatefulWidget {
 
 class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
   final Map<String, int> _cantidades = {};
+  double _totalActual = 0.0;
 
   final List<String> _categorias = opcionesPersonalizadas.keys.toList();
+
+  late final Map<String, MenuItem> _itemsPorNombre;
+
+  @override
+  void initState() {
+    super.initState();
+    _itemsPorNombre = {};
+    for (var categoria in _categorias) {
+      for (var item in opcionesPersonalizadas[categoria]!) {
+        _itemsPorNombre[item.nombre] = item;
+      }
+    }
+  }
 
   List<MapEntry<String, int>> get _selectedEntries {
     return _cantidades.entries.where((e) => e.value > 0).toList();
   }
 
-  MenuItem _getItemByNombre(String nombre) {
-    for (var cat in _categorias) {
-      for (var item in opcionesPersonalizadas[cat]!) {
-        if (item.nombre == nombre) return item;
-      }
-    }
-    throw Exception('Item no encontrado: $nombre');
-  }
-
-  double get _totalActual {
-    return _selectedEntries.fold(0, (sum, entry) {
-      final item = _getItemByNombre(entry.key);
-      return sum + (item.precio * entry.value);
-    });
-  }
-
   void _incrementar(MenuItem item) {
     setState(() {
-      _cantidades.update(item.nombre, (value) => value + 1, ifAbsent: () => 1);
+      final newValue = (_cantidades[item.nombre] ?? 0) + 1;
+      _cantidades[item.nombre] = newValue;
+      _totalActual += item.precio;
     });
   }
 
   void _decrementar(MenuItem item) {
-    setState(() {
-      final current = _cantidades[item.nombre] ?? 0;
-      if (current > 1) {
-        _cantidades[item.nombre] = current - 1;
-      } else {
-        _cantidades.remove(item.nombre);
-      }
-    });
+    final current = _cantidades[item.nombre] ?? 0;
+    if (current > 0) {
+      setState(() {
+        if (current > 1) {
+          _cantidades[item.nombre] = current - 1;
+          _totalActual -= item.precio;
+        } else {
+          _cantidades.remove(item.nombre);
+          _totalActual -= item.precio;
+        }
+      });
+    }
   }
 
   void _quitarItem(MenuItem item) {
+    final cant = _cantidades[item.nombre] ?? 0;
+    if (cant > 0) {
+      setState(() {
+        _totalActual -= item.precio * cant;
+        _cantidades.remove(item.nombre);
+      });
+    }
+  }
+
+  void _limpiarSelecciones() {
     setState(() {
-      _cantidades.remove(item.nombre);
+      _cantidades.clear();
+      _totalActual = 0.0;
     });
   }
 
@@ -71,37 +86,55 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
       return;
     }
 
+    // Validación: al menos una proteína
+    final hasProteina = _selectedEntries.any(
+      (entry) => _itemsPorNombre[entry.key]!.categoria == 'proteinas',
+    );
+    if (!hasProteina) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Debes seleccionar al menos una proteína')),
+      );
+      return;
+    }
+
     final provider = Provider.of<CarritoProvider>(context, listen: false);
 
-    String proteina = "Ninguna";
+    List<String> proteinas = [];
     List<String> carbohidratos = [];
-    String ensalada = "Ninguna";
-    String? bebida;
+    List<String> ensaladas = [];
+    List<String> bebidas = [];
     List<String> extras = [];
 
     for (var entry in _selectedEntries) {
-      final item = _getItemByNombre(entry.key);
+      final item = _itemsPorNombre[entry.key]!;
       final cant = entry.value;
-      final nombreConCant = "${cant > 1 ? '$cant x ' : ''}${item.nombre}";
+      final nombreConCant = cant > 1 ? '$cant x ${item.nombre}' : item.nombre;
 
-      if (item.categoria == "proteinas") {
-        proteina = nombreConCant;
-      } else if (item.categoria == "carbohidratos") {
-        carbohidratos.add(nombreConCant);
-      } else if (item.categoria == "ensaladas") {
-        ensalada = nombreConCant;
-      } else if (item.categoria == "bebidas") {
-        bebida = nombreConCant;
-      } else if (item.categoria == "extras") {
-        extras.add(nombreConCant);
+      switch (item.categoria) {
+        case 'proteinas':
+          proteinas.add(nombreConCant);
+          break;
+        case 'carbohidratos':
+          carbohidratos.add(nombreConCant);
+          break;
+        case 'ensaladas':
+          ensaladas.add(nombreConCant);
+          break;
+        case 'bebidas':
+          bebidas.add(nombreConCant);
+          break;
+        case 'extras':
+          extras.add(nombreConCant);
+          break;
       }
     }
 
     final almuerzo = AlmuerzoPersonalizado(
-      proteina: proteina,
+      proteinas: proteinas,
       carbohidratos: carbohidratos,
-      ensalada: ensalada,
-      bebida: bebida,
+      ensaladas: ensaladas,
+      bebidas: bebidas,
       extras: extras,
       precioTotal: _totalActual,
     );
@@ -115,15 +148,13 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
       ),
     );
 
-    setState(() {
-      _cantidades.clear();
-    });
+    _limpiarSelecciones();
   }
 
   void _mostrarRevisionPedido() {
     Map<String, List<MapEntry<String, int>>> itemsPorCategoria = {};
     for (var entry in _selectedEntries) {
-      final item = _getItemByNombre(entry.key);
+      final item = _itemsPorNombre[entry.key]!;
       final categoria = item.categoria;
       itemsPorCategoria.putIfAbsent(categoria, () => []);
       itemsPorCategoria[categoria]!.add(entry);
@@ -192,7 +223,7 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                         ),
                       ),
                       ...items.map((entry) {
-                        final item = _getItemByNombre(entry.key);
+                        final item = _itemsPorNombre[entry.key]!;
                         final cant = entry.value;
                         final subtotal = item.precio * cant;
 
@@ -395,7 +426,6 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                         clipBehavior: Clip.antiAlias,
                         child: Stack(
                           children: [
-                            // IMAGEN DINÁMICA CON FALLBACK Y ERROR HANDLING
                             Image.asset(
                               item.imagen,
                               width: double.infinity,
@@ -425,8 +455,6 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                                 );
                               },
                             ),
-
-                            // Degradado oscuro → CORREGIDO: con withValues()
                             Container(
                               height: 180,
                               decoration: BoxDecoration(
@@ -434,14 +462,12 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.black.withValues(alpha: 0.4),
-                                    Colors.black.withValues(alpha: 0.7),
+                                    Colors.black.withOpacity(0.4),
+                                    Colors.black.withOpacity(0.7),
                                   ],
                                 ),
                               ),
                             ),
-
-                            // Contenido: textos y botones
                             Padding(
                               padding: const EdgeInsets.all(16),
                               child: Row(
@@ -451,118 +477,114 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item.nombre,
-                                              style: const TextStyle(
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                                shadows: [
-                                                  Shadow(
-                                                      blurRadius: 8,
-                                                      color: Colors.black,
-                                                      offset: Offset(2, 2)),
-                                                ],
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              item.descripcion,
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                color: Colors.white,
-                                                height: 1.4,
-                                                shadows: [
-                                                  Shadow(
-                                                      blurRadius: 4,
-                                                      color: Colors.black,
-                                                      offset: Offset(1, 1)),
-                                                ],
-                                              ),
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
                                         Text(
-                                          '\$${item.precio.toStringAsFixed(0)}',
+                                          item.nombre,
                                           style: const TextStyle(
-                                            fontSize: 24,
+                                            fontSize: 22,
                                             fontWeight: FontWeight.bold,
                                             color: Colors.white,
                                             shadows: [
                                               Shadow(
-                                                  blurRadius: 6,
+                                                  blurRadius: 8,
                                                   color: Colors.black,
                                                   offset: Offset(2, 2)),
                                             ],
                                           ),
                                         ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          item.descripcion,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.white,
+                                            height: 1.4,
+                                            shadows: [
+                                              Shadow(
+                                                  blurRadius: 4,
+                                                  color: Colors.black,
+                                                  offset: Offset(1, 1)),
+                                            ],
+                                          ),
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
-                                  Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        // Fondo blanco semitransparente → CORREGIDO: con withValues()
-                                        color:
-                                            Colors.white.withValues(alpha: 0.9),
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                            color: Colors.orange, width: 2),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 6),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            iconSize: 20,
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(
-                                                minWidth: 32, minHeight: 32),
-                                            icon: Icon(
-                                              Icons.remove,
-                                              color: puedeDecrementar
-                                                  ? Colors.orange[800]!
-                                                  : Colors.grey,
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withAlpha(
+                                              242), // ← Corregido: ya no usa withOpacity
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                          border: Border.all(
+                                              color: Colors.orange, width: 2),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 4),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              iconSize: 18,
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(
+                                                  minWidth: 28, minHeight: 28),
+                                              icon: Icon(
+                                                Icons.remove,
+                                                color: puedeDecrementar
+                                                    ? Colors.orange[800]
+                                                    : Colors.grey,
+                                              ),
+                                              onPressed: puedeDecrementar
+                                                  ? () => _decrementar(item)
+                                                  : null,
                                             ),
-                                            onPressed: puedeDecrementar
-                                                ? () => _decrementar(item)
-                                                : null,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12),
-                                            child: Text(
-                                              '$cantidad',
-                                              style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black87),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10),
+                                              child: Text(
+                                                '$cantidad',
+                                                style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black87),
+                                              ),
                                             ),
-                                          ),
-                                          IconButton(
-                                            iconSize: 20,
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(
-                                                minWidth: 32, minHeight: 32),
-                                            icon: const Icon(Icons.add,
-                                                color: Colors.green),
-                                            onPressed: () => _incrementar(item),
-                                          ),
-                                        ],
+                                            IconButton(
+                                              iconSize: 18,
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(
+                                                  minWidth: 28, minHeight: 28),
+                                              icon: const Icon(Icons.add,
+                                                  color: Colors.green),
+                                              onPressed: () =>
+                                                  _incrementar(item),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '\$${item.precio.toStringAsFixed(0)}',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(
+                                                blurRadius: 6,
+                                                color: Colors.black,
+                                                offset: Offset(2, 2)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -594,12 +616,22 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Tu almuerzo personalizado',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Tu almuerzo personalizado',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete_sweep,
+                            color: Colors.orange[700], size: 28),
+                        onPressed: _limpiarSelecciones,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Expanded(
@@ -607,7 +639,7 @@ class _ArmaAlmuerzoScreenState extends State<ArmaAlmuerzoScreen> {
                       itemCount: _selectedEntries.length,
                       itemBuilder: (context, index) {
                         final entry = _selectedEntries[index];
-                        final item = _getItemByNombre(entry.key);
+                        final item = _itemsPorNombre[entry.key]!;
                         final cant = entry.value;
                         final subtotal = item.precio * cant;
 
