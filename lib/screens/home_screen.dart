@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'menu_fijo_screen.dart';
 import 'arma_almuerzo_screen.dart';
 import 'desayunos_screen.dart';
-//import 'arma_desayuno_screen.dart';
 import 'carrito.dart';
+//import 'chat_carino_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  // Mensaje "en desarrollo" para Arma Tu Desayuno
   void _mostrarEnDesarrollo(BuildContext context) {
     showDialog(
       context: context,
@@ -24,12 +23,16 @@ class HomeScreen extends StatelessWidget {
             Text(
               '¡Próximamente!',
               style: TextStyle(
-                  color: Colors.amberAccent, fontWeight: FontWeight.bold),
+                color: Colors.amberAccent,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
         content: const Text(
-          'Estamos desarrollando la función\n"Arma Tu Desayuno" 🥐\n\n¡Muy pronto podrás personalizar tu desayuno como quieras!\n\nGracias por tu paciencia 😊',
+          'Estamos desarrollando la función\n"Arma Tu Desayuno" 🥐☕\n\n'
+          '¡Muy pronto podrás personalizar tu desayuno como quieras!\n\n'
+          'Gracias por tu paciencia, mi vida 😊',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 18, height: 1.5),
         ),
@@ -42,10 +45,60 @@ class HomeScreen extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
               child: const Text(
-                'Entendido',
+                'Entendido ❤️',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _mostrarChatEnMantenimiento(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.pink[50],
+        title: const Row(
+          children: [
+            Icon(Icons.favorite_border, color: Colors.pinkAccent, size: 32),
+            SizedBox(width: 12),
+            Text(
+              '¡Proximamente!',
+              style: TextStyle(
+                color: Colors.pinkAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Estamos trabajando duro para mejorar la IA ❤️\n\n'
+          'Pronto volverá más lista, más dulce y con muchas más sorpresas para ti.\n\n'
+          'Gracias por tu paciencia, te mando un abrazo enorme 🤗',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18, height: 1.5),
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.pinkAccent,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text(
+                '❤️',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
@@ -64,8 +117,16 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.favorite, color: Colors.pinkAccent),
+            iconSize: 34,
+            tooltip: 'Habla con Cariño ❤️',
+            onPressed: () => _mostrarChatEnMantenimiento(context),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
             icon: const Icon(Icons.shopping_cart, color: Colors.orange),
             iconSize: 34,
+            tooltip: 'Ver carrito',
             onPressed: () {
               Navigator.push(
                 context,
@@ -73,11 +134,12 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 16),
         ],
       ),
       body: Stack(
         children: [
+          // Fondo con imagen
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -88,6 +150,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          // Gradiente oscuro
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -96,13 +159,14 @@ class HomeScreen extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withValues(alpha: 0.6),
-                  Colors.black.withValues(alpha: 0.4),
-                  Colors.black.withValues(alpha: 0.7),
+                  Colors.black.withAlpha(180),
+                  Colors.black.withAlpha(100),
+                  Colors.black.withAlpha(200),
                 ],
               ),
             ),
           ),
+          // Contenido principal
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -120,9 +184,10 @@ class HomeScreen extends StatelessWidget {
                       letterSpacing: 1.5,
                       shadows: [
                         Shadow(
-                            blurRadius: 15,
-                            color: Colors.black87,
-                            offset: Offset(4, 4)),
+                          blurRadius: 15,
+                          color: Colors.black87,
+                          offset: Offset(4, 4),
+                        ),
                       ],
                     ),
                   ),
@@ -138,17 +203,71 @@ class HomeScreen extends StatelessWidget {
                       color: Colors.white,
                       shadows: [
                         Shadow(
-                            blurRadius: 12,
-                            color: Colors.black87,
-                            offset: Offset(3, 3)),
+                          blurRadius: 12,
+                          color: Colors.black87,
+                          offset: Offset(3, 3),
+                        ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 40),
 
-                  // === ALMUERZOS ===
+                  // === TARJETA DESTACADA DE DESAYUNOS (más pequeña y elegante) ===
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black45,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.free_breakfast,
+                            size: 32, color: Colors.brown[700]),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                '¡También tenemos desayunos! ☕🥐',
+                                style: TextStyle(
+                                  fontSize: 16.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              Text(
+                                'De 6:00 AM a 10:30 AM • Desliza abajo ↓',
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.arrow_downward,
+                            size: 28, color: Colors.brown[700]),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  // === MENÚ DEL DÍA ===
                   _buildBotonConTextoHorario(
+                    context: context,
                     icon: Icons.restaurant_menu,
                     label: 'Menú del Día',
                     color: Colors.orange[100]!,
@@ -162,7 +281,9 @@ class HomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
+                  // === ARMA TU ALMUERZO ===
                   _buildBotonConTextoHorario(
+                    context: context,
                     icon: Icons.lunch_dining,
                     label: 'Arma Tu Almuerzo',
                     color: Colors.orange[700]!,
@@ -179,6 +300,7 @@ class HomeScreen extends StatelessWidget {
 
                   // === DESAYUNOS ===
                   _buildBotonConTextoHorario(
+                    context: context,
                     icon: Icons.free_breakfast,
                     label: 'Desayunos',
                     color: Colors.amber[100]!,
@@ -186,14 +308,16 @@ class HomeScreen extends StatelessWidget {
                     horarioTexto: 'Disponible de 6:00 AM a 10:30 AM',
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => DesayunosScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const DesayunosScreen()),
                     ),
                   ),
 
                   const SizedBox(height: 30),
 
-                  // === ARMA TU DESAYUNO - EN DESARROLLO ===
+                  // === ARMA TU DESAYUNO (en desarrollo) ===
                   _buildBotonConTextoHorario(
+                    context: context,
                     icon: Icons.build_circle,
                     label: 'Arma Tu Desayuno',
                     color: Colors.amber[600]!,
@@ -202,7 +326,40 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () => _mostrarEnDesarrollo(context),
                   ),
 
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 60),
+
+                  // === INDICADOR DE SCROLL ===
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          'Desliza hacia abajo para ver más ↓',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.95),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            shadows: const [
+                              Shadow(
+                                color: Colors.black87,
+                                blurRadius: 10,
+                                offset: Offset(2, 2),
+                              )
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.white,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -212,8 +369,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Botón normal con solo texto de horario debajo
   Widget _buildBotonConTextoHorario({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required Color color,
@@ -238,14 +395,14 @@ class HomeScreen extends StatelessWidget {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           ),
-          onPressed: onPressed, // Siempre habilitado
+          onPressed: onPressed,
         ),
         const SizedBox(height: 8),
         Text(
           horarioTexto,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white.withValues(alpha: 0.9),
+            color: Colors.white.withAlpha(230),
             fontStyle: FontStyle.italic,
           ),
           textAlign: TextAlign.center,
@@ -255,4 +412,3 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-}
