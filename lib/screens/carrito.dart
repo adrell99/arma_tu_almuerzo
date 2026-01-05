@@ -1,10 +1,13 @@
 // lib/screens/carrito.dart
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http; // Para enviar al Google Sheet
 
-import '../models/item_menu.dart'; // ← Aquí está AlmuerzoPersonalizado con listas
+import '../models/item_menu.dart';
 import '../providers/carrito_provider.dart';
 
 class CarritoScreen extends StatefulWidget {
@@ -64,18 +67,17 @@ class _CarritoScreenState extends State<CarritoScreen> {
       return;
     }
 
+    // === Construir detalle del pedido ===
     String detallePedido = "";
 
-    // === Almuerzos Personalizados ===
     for (int i = 0; i < provider.almuerzosPersonalizados.length; i++) {
       final almuerzo = provider.almuerzosPersonalizados[i];
       detallePedido += "*Almuerzo Personalizado ${i + 1}* 🍱\n";
-      detallePedido += almuerzo.descripcion; // ← Usa el método del modelo
+      detallePedido += almuerzo.descripcion;
       detallePedido +=
           "\n*Precio:* \$${almuerzo.precioTotal.toStringAsFixed(0)}\n\n";
     }
 
-    // === Ítems normales (menús fijos, extras, etc.) ===
     if (provider.itemsNormales.isNotEmpty) {
       detallePedido += "*Otros ítems:*\n";
       for (var item in provider.itemsNormales) {
@@ -92,14 +94,38 @@ class _CarritoScreenState extends State<CarritoScreen> {
         ? "Sin nota adicional"
         : _notaController.text.trim();
 
-    final String codigoVerificacion =
-        DateTime.now().millisecondsSinceEpoch.toString().substring(6, 12);
+    String codigo = DateTime.now()
+        .millisecondsSinceEpoch
+        .remainder(1000000)
+        .toString()
+        .padLeft(6, '0');
 
-    String mensaje = """
+    // === 1. ENVIAR COPIA ORIGINAL AL GOOGLE SHEET (silencioso, sin mensajes) ===
+    const String webhookUrl =
+        "https://script.google.com/macros/s/AKfycbwi5ww3fl9iDJTEDeZE2ELcavRALpPCR55i-lqhPpKEbjCxKyoudxXFRmGX0AjQiToQtQ/exec";
+
+    final Map<String, dynamic> datosPedido = {
+      "nombre": _nombreController.text.trim(),
+      "telefono": _telefonoController.text.trim(),
+      "direccion": _direccionController.text.trim(),
+      "detallePedido": detallePedido,
+      "nota": nota,
+      "total": provider.total.toStringAsFixed(0),
+      "codigo": codigo,
+    };
+
+    http.post(
+      Uri.parse(webhookUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(datosPedido),
+    );
+
+    // === 2. ABRIR WHATSAPP PARA EL CLIENTE ===
+    String mensajeCliente = """
 *NUEVO PEDIDO* 🍱
 
 *Nombre:* ${_nombreController.text.trim()}
-*Teléfono WhatsApp:* ${_telefonoController.text.trim()}
+*Teléfono:* ${_telefonoController.text.trim()}
 *Dirección / Barrio:* ${_direccionController.text.trim()}
 
 *Detalle del pedido:*
@@ -109,52 +135,39 @@ $detallePedido
 
 *Total a pagar:* \$${provider.total.toStringAsFixed(0)}
 
-*Código de verificación:* #$codigoVerificacion 
-(No edites este mensaje para que sea válido)
+*Código de verificación:* #$codigo
 
 ¡Gracias por tu pedido! Te confirmaremos pronto 🚀
-""";
+"""
+        .trim();
 
-    final String tuNumeroWhatsApp = "573176496806"; // Cambia si es necesario
+    final String numeroPrincipal = "573176496806";
 
     final Uri whatsappUri = Uri(
       scheme: 'whatsapp',
       host: 'send',
       queryParameters: {
-        'phone': tuNumeroWhatsApp,
-        'text': mensaje,
+        'phone': numeroPrincipal,
+        'text': mensajeCliente,
       },
     );
 
     try {
       if (await canLaunchUrl(whatsappUri)) {
         await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡Abriendo WhatsApp con tu pedido listo!'),
-            backgroundColor: Colors.green,
-          ),
-        );
       } else {
-        throw 'No se pudo abrir WhatsApp';
+        throw Exception('No se pudo abrir WhatsApp');
       }
     } catch (e) {
       final Uri webUri = Uri.parse(
-        "https://wa.me/$tuNumeroWhatsApp?text=${Uri.encodeComponent(mensaje)}",
+        "https://wa.me/$numeroPrincipal?text=${Uri.encodeComponent(mensajeCliente)}",
       );
       if (await canLaunchUrl(webUri)) {
         await launchUrl(webUri);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Abriendo WhatsApp en navegador...')),
-        );
       } else {
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-                'Error al abrir WhatsApp. Verifica que tengas la app instalada.'),
+            content: Text('Error al abrir WhatsApp'),
             backgroundColor: Colors.red,
           ),
         );
@@ -191,7 +204,7 @@ $detallePedido
                       ),
                       const SizedBox(height: 16),
 
-                      // === Almuerzos Personalizados ===
+                      // Almuerzos Personalizados
                       ...almuerzos.asMap().entries.map((entry) {
                         int index = entry.key;
                         AlmuerzoPersonalizado almuerzo = entry.value;
@@ -221,8 +234,7 @@ $detallePedido
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  almuerzo
-                                      .descripcion, // ← Muestra todo bonito con listas
+                                  almuerzo.descripcion,
                                   style: const TextStyle(
                                       fontSize: 16, height: 1.5),
                                 ),
@@ -252,7 +264,7 @@ $detallePedido
                         );
                       }),
 
-                      // === Ítems normales ===
+                      // Ítems normales
                       ...itemsNormales.map((item) {
                         return Card(
                           elevation: 4,
@@ -286,7 +298,6 @@ $detallePedido
 
                       const Divider(height: 40, thickness: 2),
 
-                      // Total
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -305,7 +316,6 @@ $detallePedido
 
                       const SizedBox(height: 30),
 
-                      // Formulario de datos
                       const Text('Completa tus datos',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
@@ -354,7 +364,6 @@ $detallePedido
 
                       const SizedBox(height: 40),
 
-                      // Botón enviar
                       ElevatedButton(
                         onPressed: _enviarPedidoPorWhatsApp,
                         style: ElevatedButton.styleFrom(
@@ -391,3 +400,4 @@ $detallePedido
     );
   }
 }
+
