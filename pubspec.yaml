@@ -14,12 +14,18 @@ dependencies:
   collection: ^1.18.0
   url_launcher: ^6.3.0
   flutter_native_splash: ^2.4.1
+  shared_preferences: ^2.2.2
 
   # === PAQUETES NUEVOS PARA EL CHATBOT "CARIÑO" ===
-  http: ^1.2.2                    # Para llamar a la API de Groq
-  flutter_chat_ui: ^2.0.0   
-  flutter_chat_types: ^2.0.0       # Para el chat bonito y moderno
-  uuid: ^4.4.0        
+
+  flutter_chat_ui: ^2.11.0  # Versión nueva
+  flutter_chat_core: ^2.9.0  # ¡Obligatoria para v2!
+  uuid: ^4.0.0
+  http: ^1.6.0
+  flutter_dotenv: ^6.0.0
+  dart_sentiment: ^0.0.9 # Para detección simple de emociones
+  flutter_tts: ^4.2.3  # Para voz
+
         
 
 dev_dependencies:
@@ -107,9 +113,12 @@ flutter:
     - assets/images/menu/aguacate_grande.jpg
     - assets/images/menu/medio_aguacate.jpg
     - assets/images/menu/sopa_dia.jpg
+    - assets/images/menu/splash_moto.png
 
 flutter_native_splash:
-  color: "#E31C2D"  # Rojo de tu logo
+  color: "#E53935"
+  # O el clásico rojo fuerte:
+  # color: "#D32F2F"
   image: assets/images/menu/logo.jpg
   android: true
   ios: true
