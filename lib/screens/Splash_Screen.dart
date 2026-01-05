@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'home_screen.dart'; // Tu pantalla principal
+import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,8 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Espera 3 segundos y luego va a HomeScreen
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 10), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
@@ -26,38 +25,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Colors.orange[700], // Color de fondo (cámbialo al de tu marca)
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Tu logo grande
-            Image.asset(
-              'assets/images/menu/logo.jpg',
-              width: 200, // Ajusta el tamaño según tu logo
-              height: 200,
-            ),
-            const SizedBox(height: 40),
-            // Nombre del restaurante debajo (opcional)
-            const Text(
-              'Come casero tu cuerpo te lo agradecera',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 2,
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Animación de carga (opcional pero queda pro)
-            const CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 4,
-            ),
-          ],
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          color: Color(0xFFE53935), // Fondo rojo por si la imagen no cubre todo
+        ),
+        child: Center(
+          child: Image.asset(
+            'assets/images/menu/splash_moto.png', // ← Tu imagen con la moto y textos
+            fit: BoxFit
+                .contain, // ← CLAVE: Muestra la imagen completa sin recortar
+            width: double.infinity,
+            height: double.infinity,
+          ),
         ),
       ),
+      // Loader opcional encima (si quieres que se vea "cargando")
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      // floatingActionButton: const Padding(
+      //   padding: EdgeInsets.only(bottom: 50),
+      //   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 6),
+      // ),
     );
   }
 }
