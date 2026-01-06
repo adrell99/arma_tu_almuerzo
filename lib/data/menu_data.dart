@@ -239,8 +239,8 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
         imagen: "assets/images/menu/pechuga_milanesa.jpg"),
     MenuItem(
         nombre: "Alitas Fritas",
-        descripcion: "Arroz, ensalada, principio, contorno, sopa, limonada",
-        precio: 13000,
+        descripcion: "3 alas fritas 150g",
+        precio: 6000,
         categoria: "fijo",
         imagen: "assets/images/menu/alitas_fritas.jpg"),
     MenuItem(
@@ -252,7 +252,7 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
     MenuItem(
         nombre: "albondigas",
         descripcion: "Arroz, ensalada, principio, contorno, sopa, limonada",
-        precio: 13000,
+        precio: 7000,
         categoria: "fijo",
         imagen: "assets/images/menu/albondigas.jpg"),
     MenuItem(
@@ -270,7 +270,7 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
     MenuItem(
         nombre: "Chatas",
         descripcion: "300g",
-        precio: 7000,
+        precio: 10000,
         categoria: "proteinas",
         imagen: "assets/images/menu/chatas.jpg"),
     MenuItem(
@@ -299,14 +299,14 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
         imagen: "assets/images/menu/mojarra_frita.jpg"),
     MenuItem(
         nombre: "Sobrebarriga",
-        descripcion: "Lentejas o garbanzos",
-        precio: 6000,
+        descripcion: "150g",
+        precio: 8000,
         categoria: "proteinas",
         imagen: "assets/images/menu/sobrebarriga.jpg"),
     MenuItem(
         nombre: "Pollo Apanado",
         descripcion: "Muslo y contramuslo",
-        precio: 8000,
+        precio: 7000,
         categoria: "proteinas",
         imagen: "assets/images/menu/pollo_apanado.jpg"),
     MenuItem(
@@ -392,17 +392,17 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
   ],
   "carbohidratos": [
     MenuItem(
-        nombre: "Mucho arroz blanco",
-        descripcion: "Porción grande",
-        precio: 4500,
-        categoria: "carbohidratos",
-        imagen: "assets/images/menu/arroz_mucho.jpg"),
-    MenuItem(
         nombre: "Arroz blanco",
         descripcion: "Porción normal",
         precio: 3000,
         categoria: "carbohidratos",
         imagen: "assets/images/menu/arroz_blanco.jpg"),
+    MenuItem(
+        nombre: "Mucho arroz blanco",
+        descripcion: "Porción grande",
+        precio: 4500,
+        categoria: "carbohidratos",
+        imagen: "assets/images/menu/arroz_mucho.jpg"),
     MenuItem(
         nombre: "Poco arroz blanco",
         descripcion: "Porción pequeña",
@@ -415,6 +415,12 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
         precio: 8000,
         categoria: "carbohidratos",
         imagen: "assets/images/menu/pastas_bolonesa_mini.jpg"),
+    MenuItem(
+        nombre: "Pastas con carne molida mini",
+        descripcion: "Porción normal",
+        precio: 8000,
+        categoria: "carbohidratos",
+        imagen: "assets/images/menu/pastas_bolonesa.jpg"),
     MenuItem(
         nombre: "Pastas con carne molida normal",
         descripcion: "Porción normal",
@@ -446,6 +452,18 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
         categoria: "carbohidratos",
         imagen: "assets/images/menu/patacon.jpg"),
     MenuItem(
+        nombre: "Papa amarilla 'criolla'",
+        descripcion: "Porción normal",
+        precio: 2000,
+        categoria: "carbohidratos",
+        imagen: "assets/images/menu/papa_amarilla.jpg"),
+    MenuItem(
+        nombre: "Mucha Papa amarilla 'criolla'",
+        descripcion: "Porción grande",
+        precio: 4000,
+        categoria: "carbohidratos",
+        imagen: "assets/images/menu/papa_amarilla.jpg"),
+    MenuItem(
         nombre: "Yuca al vapor",
         descripcion: "Porción",
         precio: 2000,
@@ -458,21 +476,33 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
         categoria: "carbohidratos",
         imagen: "assets/images/menu/papa_salada.jpg"),
     MenuItem(
-        nombre: "Pastas normales",
+        nombre: "Pastas normales grande",
         descripcion: "Porción de pastas simples",
-        precio: 5000,
+        precio: 8000,
         categoria: "carbohidratos",
         imagen: "assets/images/menu/pastas_simples.jpg"),
     MenuItem(
-        nombre: "Pastas con pollo",
-        descripcion: "Pastas con pollo incluido",
-        precio: 7000,
+        nombre: "Pastas con pollo grande",
+        descripcion: "Pastas con pollo incluido porcion grande",
+        precio: 10000,
         categoria: "carbohidratos",
         imagen: "assets/images/menu/pastas_pollo.jpg"),
     MenuItem(
-        nombre: "Arroz con pollo",
-        descripcion: "Arroz con pollo incluido",
-        precio: 7000,
+        nombre: "Arroz con pollo mini",
+        descripcion: "Arroz con pollo incluido porcion grande",
+        precio: 10000,
+        categoria: "carbohidratos",
+        imagen: "assets/images/menu/arroz_con_pollo.jpg"),
+    MenuItem(
+        nombre: "Pastas con pollo",
+        descripcion: "Pastas con pollo incluido porcion mini",
+        precio: 8000,
+        categoria: "carbohidratos",
+        imagen: "assets/images/menu/pastas_pollo.jpg"),
+    MenuItem(
+        nombre: "Arroz con pollo mini",
+        descripcion: "Arroz con pollo incluido porcion mini",
+        precio: 8000,
         categoria: "carbohidratos",
         imagen: "assets/images/menu/arroz_con_pollo.jpg"),
   ],
@@ -563,25 +593,47 @@ final Map<String, List<MenuItem>> opcionesPersonalizadas = {
 };
 final List<MenuItem> menuDesayunosFijos = [
   MenuItem(
-    nombre: "Calentado Paisa",
-    descripcion: "Frijoles, arroz, huevo, chicharrón, arepa, aguacate y café",
-    precio: 18000,
+    nombre: "Caldo de carne",
+    descripcion: "Delicioso caldo de carne + arepa amarilla",
+    precio: 12000,
     categoria: "desayuno_fijo",
-    imagen: "assets/images/desayunos/calentado.jpg",
+    imagen: "assets/images/menu/caldodecarne.jpg",
   ),
   MenuItem(
-    nombre: "Desayuno Ejecutivo",
-    descripcion: "Huevos pericos, arepa con queso, jugo natural y café",
-    precio: 16000,
+    nombre: "Caldo de huevo con leche",
+    descripcion: "Delicioso caldo de huevo con leche + arepa amarilla ",
+    precio: 11000,
     categoria: "desayuno_fijo",
-    imagen: "assets/images/desayunos/ejecutivo.jpg",
+    imagen: "assets/images/menu/caldohuevo.jpg",
   ),
   MenuItem(
-    nombre: "Tamal con Chocolate",
-    descripcion: "Tamal tolimense, pan, queso y chocolate caliente",
-    precio: 20000,
+    nombre: "Huevos rancheros",
+    descripcion: "3 huevos + salchicha + queso + maiz + amarilla",
+    precio: 13000,
     categoria: "desayuno_fijo",
-    imagen: "assets/images/desayunos/tamal.jpg",
+    imagen: "assets/images/menu/huevosrancheros.jpg",
+  ),
+  MenuItem(
+    nombre: "Huevos pericos",
+    descripcion:
+        "3 huevos + tomate y cebolla + arepa amarilla o pan escribir en nota",
+    precio: 12000,
+    categoria: "desayuno_fijo",
+    imagen: "assets/images/menu/huevospericos.jpg",
+  ),
+  MenuItem(
+    nombre: "Pata Sudada",
+    descripcion: "Deliciosa pata sudada + yuca cocida o arepa escribir en nota",
+    precio: 13000,
+    categoria: "desayuno_fijo",
+    imagen: "assets/images/menu/pata_sudada.jpg",
+  ),
+  MenuItem(
+    nombre: "Chanfaina",
+    descripcion: "Deliciosa chanfaina + yuca cocida o arepa escribir en nota",
+    precio: 13000,
+    categoria: "desayuno_fijo",
+    imagen: "assets/images/menu/chanfaina.jpg",
   ),
   // Agrega los que quieras
 ];
