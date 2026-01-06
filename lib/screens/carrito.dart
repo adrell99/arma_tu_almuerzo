@@ -67,25 +67,55 @@ class _CarritoScreenState extends State<CarritoScreen> {
       return;
     }
 
-    // === Construir detalle del pedido ===
+    // === Construir detalle del pedido con secciones organizadas ===
     String detallePedido = "";
 
-    for (int i = 0; i < provider.almuerzosPersonalizados.length; i++) {
-      final almuerzo = provider.almuerzosPersonalizados[i];
-      detallePedido += "*Almuerzo Personalizado ${i + 1}* 🍱\n";
-      detallePedido += almuerzo.descripcion;
-      detallePedido +=
-          "\n*Precio:* \$${almuerzo.precioTotal.toStringAsFixed(0)}\n\n";
+    final almuerzos = provider.almuerzosPersonalizados;
+    final itemsNormales = provider.itemsNormales;
+
+    // Separar ítems normales usando la propiedad 'categoria' (más flexible con .contains)
+    final desayunos = itemsNormales
+        .where((item) => item.categoria.toLowerCase().contains('desayuno'))
+        .toList();
+
+    final almuerzosFijos = itemsNormales
+        .where((item) => !item.categoria.toLowerCase().contains('desayuno'))
+        .toList();
+
+    // Almuerzos Personalizados
+    if (almuerzos.isNotEmpty) {
+      detallePedido += "*Almuerzos Personalizados* 🍱\n\n";
+      for (int i = 0; i < almuerzos.length; i++) {
+        final almuerzo = almuerzos[i];
+        detallePedido += "*Almuerzo Personalizado ${i + 1}:*\n";
+        detallePedido += almuerzo.descripcion.trim() + "\n";
+        detallePedido +=
+            "*Precio:* \$${almuerzo.precioTotal.toStringAsFixed(0)}\n\n";
+      }
     }
 
-    if (provider.itemsNormales.isNotEmpty) {
-      detallePedido += "*Otros ítems:*\n";
-      for (var item in provider.itemsNormales) {
+    // Desayunos (sección aparte con subtítulo claro)
+    if (desayunos.isNotEmpty) {
+      detallePedido += "*Desayunos* ☕\n";
+      for (var item in desayunos) {
         detallePedido += "• ${item.nombre}";
         if (item.descripcion.isNotEmpty) {
           detallePedido += " - ${item.descripcion}";
         }
-        detallePedido += " - \$${item.precio.toStringAsFixed(0)}\n";
+        detallePedido += " \$${item.precio.toStringAsFixed(0)}\n";
+      }
+      detallePedido += "\n";
+    }
+
+    // Almuerzos del Menú Fijo (solo los que no son desayuno)
+    if (almuerzosFijos.isNotEmpty) {
+      detallePedido += "*Almuerzos del Menú Fijo* 🍲\n";
+      for (var item in almuerzosFijos) {
+        detallePedido += "• ${item.nombre}";
+        if (item.descripcion.isNotEmpty) {
+          detallePedido += " - ${item.descripcion}";
+        }
+        detallePedido += " \$${item.precio.toStringAsFixed(0)}\n";
       }
       detallePedido += "\n";
     }
@@ -100,7 +130,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
         .toString()
         .padLeft(6, '0');
 
-    // === 1. ENVIAR COPIA ORIGINAL AL GOOGLE SHEET (silencioso, sin mensajes) ===
+    // === 1. ENVIAR COPIA AL GOOGLE SHEET ===
     const String webhookUrl =
         "https://script.google.com/macros/s/AKfycbwi5ww3fl9iDJTEDeZE2ELcavRALpPCR55i-lqhPpKEbjCxKyoudxXFRmGX0AjQiToQtQ/exec";
 
@@ -120,7 +150,7 @@ class _CarritoScreenState extends State<CarritoScreen> {
       body: jsonEncode(datosPedido),
     );
 
-    // === 2. ABRIR WHATSAPP PARA EL CLIENTE ===
+    // === 2. ABRIR WHATSAPP ===
     String mensajeCliente = """
 *NUEVO PEDIDO* 🍱
 
@@ -204,7 +234,7 @@ $detallePedido
                       ),
                       const SizedBox(height: 16),
 
-                      // Almuerzos Personalizados
+                      // === Almuerzos Personalizados ===
                       ...almuerzos.asMap().entries.map((entry) {
                         int index = entry.key;
                         AlmuerzoPersonalizado almuerzo = entry.value;
@@ -220,15 +250,29 @@ $detallePedido
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  children: const [
-                                    Icon(Icons.restaurant_menu,
-                                        color: Colors.orange),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Almuerzo Personalizado",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
+                                  children: [
+                                    // Cubiertos cruzados (icono de plato con tenedor y cuchillo cruzados)
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.dining,
+                                        size: 40,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        "Almuerzo Personalizado ${index + 1}",
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -264,18 +308,32 @@ $detallePedido
                         );
                       }),
 
-                      // Ítems normales
+                      // === Ítems normales (desayunos y almuerzos fijos) ===
                       ...itemsNormales.map((item) {
                         return Card(
                           elevation: 4,
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           child: ListTile(
-                            leading: const Icon(Icons.fastfood,
-                                color: Colors.orange),
-                            title: Text(item.nombre,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            subtitle: Text(item.descripcion),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.asset(
+                                item.imagen,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.fastfood,
+                                        size: 50, color: Colors.orange),
+                              ),
+                            ),
+                            title: Text(
+                              item.nombre,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: item.descripcion.isEmpty
+                                ? null
+                                : Text(item.descripcion),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
